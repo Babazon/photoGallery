@@ -16,6 +16,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import {
   Colors,
@@ -62,7 +63,7 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  return (
+  return (<GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
@@ -93,6 +94,7 @@ function App(): JSX.Element {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
