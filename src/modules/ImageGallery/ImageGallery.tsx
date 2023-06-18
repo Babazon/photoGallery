@@ -1,66 +1,90 @@
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from "react-native"
-import { AppImage } from "../../constants/api-types"
-import { useGetImagesQuery } from "../../services/queries";
-import { useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View, Dimensions, ImageBackground, Button } from 'react-native';
+import { useGetImages } from './hooks/useGetImages';
+import { ImageDto } from '../../constants/types';
+import React, { useMemo } from 'react';
 
+const { width } = Dimensions.get('window');
+const itemWidth = width;
+const itemHeight = width / 2;
 export const ImageGallery: React.FC = () => {
-    const [page, setPage] = useState(0);
-    const { data, isLoading, isError, error, isFetching } = useGetImagesQuery(page);
-
-    useEffect(() => {
-        setPage(1)
-    }, [])
-
-    const handleLoadMore = () => {
-        setPage((prevPage) => prevPage + 1);
-    };
-
+    const {
+      combinedData,
+      isLoading,
+      isError,
+      error,
+      isFetching,
+      handleLoadMore,
+      handleRefresh,
+    } = useGetImages();
+  
     if (isLoading) {
-        return <View><ActivityIndicator size={'large'} color={'red'} /></View>;
+      return (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="red" />
+        </View>
+      );
     }
-
+  
     if (isError) {
-        return <View><Text>{error?.message}</Text></View>;
+      return (
+        <View style={styles.errorContainer}>
+          <Text>{error?.message}</Text>
+        </View>
+      );
     }
-
+  
     return (
-        <FlatList
-            data={data}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-                <View style={styles.itemContainer}>
-                    <Text>{item.title}</Text>
-                    <Text>{item.description}</Text>
-                    <Image source={{ uri: item.fullImageUrl }} style={styles.image} />
-                </View>
-            )}
-            onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.5}
-            refreshing={isFetching}
-            onRefresh={() => setPage(1)}
-            contentContainerStyle={styles.flatListContent}
-        />
-    )
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 16,
-        backgroundColor: 'red',
+      <FlatList
+        data={combinedData}
+        keyExtractor={(item, index) => `${item.id}_${index}`}
+        renderItem={({ item }) => (
+          <View style={styles.itemContainer}>
+            <Image source={{ uri: item.url }} style={styles.image} />
+            <Text style={styles.title}>{item.id}. {item.title}</Text>
+            <Text style={styles.description}>{item.description}</Text>
+          </View>
+        )}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        refreshing={isFetching}
+        onRefresh={handleRefresh}
+        contentContainerStyle={styles.flatListContent}
+      />
+    );
+  };
+  
+  const styles = StyleSheet.create({
+    loaderContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     itemContainer: {
-        marginBottom: 16,
+      width: itemWidth,
+      height: itemHeight,
+      marginBottom: 16,
     },
     image: {
-        width: 200,
-        height: 200,
-        resizeMode: 'contain',
+      flex: 1,
+      resizeMode: 'cover',
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginVertical: 8,
+    },
+    description: {
+      fontSize: 14,
+      marginBottom: 8,
     },
     flatListContent: {
-        flexGrow: 1,
-        padding: 16,
+      paddingHorizontal: 16,
+      paddingTop: 16,
+      paddingBottom: 16,
     },
-});
+  });

@@ -1,20 +1,20 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from 'react-query';
-import { AppImage, ImageComment } from '../constants/api-types';
+import { ImageDto, CommentDto } from '../constants/types';
 import { addComment, deleteComment, editComment, getImages } from './api';
 
-const CACHE_STALE_TIME =300000
+const CACHE_STALE_TIME = 300000;
 
-export const useGetImagesQuery = (page: number) => {
-  return useQuery<AppImage[], Error>(['images', page], () => getImages(page), {
+export const useGetImagesQuery = (page: number) => {  
+  return useQuery<ImageDto[], Error>(['images', page], () => getImages(page), {
     keepPreviousData: true,
-    staleTime: CACHE_STALE_TIME, 
+    staleTime: CACHE_STALE_TIME,
   });
 };
 
 export const useAddCommentMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<ImageComment | undefined, Error, { imageId: string; comment: string }>(
+  return useMutation<CommentDto | undefined, Error, { imageId: string; comment: string }>(
     ({ imageId, comment }) => addComment(imageId, comment),
     {
       onSuccess: () => {
@@ -27,7 +27,7 @@ export const useAddCommentMutation = () => {
 export const useEditCommentMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<ImageComment | undefined, Error, { imageId: string; commentId: string; updatedComment: string }>(
+  return useMutation<CommentDto | undefined, Error, { imageId: string; commentId: string; updatedComment: string }>(
     ({ imageId, commentId, updatedComment }) => editComment(imageId, commentId, updatedComment),
     {
       onSuccess: () => {

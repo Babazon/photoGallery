@@ -1,55 +1,46 @@
-import { AppImage, ImageComment } from '../constants/api-types';
-import mockResponse from '../constants/imageData';
+import axios from 'axios';
+import { ImageDto, CommentDto } from '../constants/types';
 
-const {data: imagesData } = mockResponse;
-
+const API_URL = 'http://localhost:3000';
 
 const PAGE_SIZE = 10;
 
-export const getImages = async (page: number): Promise<AppImage[]> => {
+export const getImages = async (page: number): Promise<ImageDto[]> => {
   const startIndex = (page - 1) * PAGE_SIZE;
   const endIndex = startIndex + PAGE_SIZE;
-  const paginatedImages = imagesData.slice(startIndex, endIndex);
-  return paginatedImages;
+  const response = await axios.get(`${API_URL}/images?_start=${startIndex}&_end=${endIndex}`);
+  return response.data;
 };
 
-export const addComment = async (imageId: string, comment: string): Promise<ImageComment | undefined> => {
-    const image = imagesData.find((image:AppImage) => image.id === imageId);
-  
-    if (image) {
-      const newComment: ImageComment = {
-        id: Math.random().toString(),
-        comment,
-        date: new Date().toISOString(),
-      };
-  
-      image.comments.push(newComment);
-      return newComment;
-    }
-  
+export const addComment = async (imageId: string, comment: string): Promise<CommentDto | undefined> => {
+  try {
+    const response = await axios.post(`${API_URL}/images/${imageId}/comments`, {
+      comment,
+      date: new Date().toISOString(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to add comment:', error);
     return undefined;
-  };
-  
-  export const editComment = async (imageId: string, commentId: string, updatedComment: string): Promise<ImageComment | undefined> => {
-    const image = imagesData.find((image:AppImage) => image.id === imageId);
-    if (image) {
-      const comment = image.comments.find((comment:ImageComment) => comment.id === commentId);
-      if (comment) {
-        comment.comment = updatedComment;
-        return comment;
-      }
-    }
-  
+  }
+};
+
+export const editComment = async (imageId: string, commentId: string, updatedComment: string): Promise<CommentDto | undefined> => {
+  try {
+    const response = await axios.put(`${API_URL}/images/${imageId}/comments/${commentId}`, {
+      comment: updatedComment,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to edit comment:', error);
     return undefined;
-  };
-  
-  export const deleteComment = async (imageId: string, commentId: string): Promise<void> => {
-    const image = imagesData.find((image: AppImage) => image.id === imageId);
-    if (image) {
-      const commentIndex = image.comments.findIndex((comment: ImageComment) => comment.id === commentId);
-      if (commentIndex !== -1) {
-        image.comments.splice(commentIndex, 1);
-      }
-    }
-  };
-  
+  }
+};
+
+export const deleteComment = async (imageId: string, commentId: string): Promise<void> => {
+  try {
+    await axios.delete(`${API_URL}/images/${imageId}/comments/${commentId}`);
+  } catch (error) {
+    console.error('Failed to delete comment:', error);
+  }
+};

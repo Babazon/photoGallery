@@ -1,16 +1,16 @@
 export type Maybe<T> = T | undefined |null;
 
-export interface ImageComment {
+export interface CommentDto {
     id:string;
     comment: string;
     date: string;
+    imageId: string;
 }
 
-export interface AppImage {
-    fullImageUrl: string;
-    thumbnailUrl: string;
+export interface ImageDto {
+    url:string
     id: string;
     title: Maybe<string>;
     description: Maybe<string>;
-    comments: ImageComment[];
+    comments: CommentDto[];
 }   
