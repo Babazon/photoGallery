@@ -1,7 +1,5 @@
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import React, {useMemo, useRef, useState} from 'react';
-import {View} from 'react-native';
-import styled from 'styled-components/native';
 import {ImageDto} from '../../constants/types';
 import {Error, ErrorContainer} from './components/Error';
 import {ImageModal} from './components/ImageModal';
@@ -9,11 +7,6 @@ import {ImagesList} from './components/ImagesList';
 import {Loader, LoaderContainer} from './components/Loader';
 import {useGetImages} from './hooks/useGetImages';
 import {useImageComments} from './hooks/useImageComments';
-
-const Container = styled(View)`
-  flex: 1;
-  backgroundcolor: 'red';
-`;
 
 export const ImageGallery: React.FC = () => {
   const {
@@ -33,6 +26,8 @@ export const ImageGallery: React.FC = () => {
     setNewComment,
     editComment,
     setEditComment,
+    selectedComment,
+    setSelectedComment,
     handleSubmitAddComment,
     handleSubmitEditComment,
     handleSubmitDeleteComment,
@@ -42,7 +37,10 @@ export const ImageGallery: React.FC = () => {
   const snapPoints = useMemo(() => ['90%'], []);
 
   const openModal = () => {
+    // TS Ignore necessary for bottomSheet ref method
+    // @ts-ignore
     bottomSheetModalRef?.current?.present &&
+      // @ts-ignore
       bottomSheetModalRef.current.present();
   };
 
@@ -54,7 +52,7 @@ export const ImageGallery: React.FC = () => {
   if (isLoading) {
     return (
       <LoaderContainer>
-        <Loader size="large" color="red" />
+        <Loader size="large" color="gray" />
       </LoaderContainer>
     );
   }
@@ -69,28 +67,28 @@ export const ImageGallery: React.FC = () => {
 
   return (
     <BottomSheetModalProvider>
-      <Container>
-        <ImagesList
-          data={combinedData}
-          onPress={handleImagePress}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          refreshing={isFetching}
-          onRefresh={handleRefresh}
-        />
-        <ImageModal
-          ref={bottomSheetModalRef}
-          snapPoints={snapPoints}
-          selectedImage={selectedImage}
-          newComment={newComment}
-          setNewComment={setNewComment}
-          editComment={editComment}
-          setEditComment={setEditComment}
-          handleSubmitAddComment={handleSubmitAddComment}
-          handleSubmitEditComment={handleSubmitEditComment}
-          handleSubmitDeleteComment={handleSubmitDeleteComment}
-        />
-      </Container>
+      <ImagesList
+        data={combinedData}
+        onPress={handleImagePress}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        refreshing={isFetching}
+        onRefresh={handleRefresh}
+      />
+      <ImageModal
+        ref={bottomSheetModalRef}
+        snapPoints={snapPoints}
+        selectedImage={selectedImage}
+        selectedComment={selectedComment}
+        setSelectedComment={setSelectedComment}
+        newComment={newComment}
+        setNewComment={setNewComment}
+        editComment={editComment}
+        setEditComment={setEditComment}
+        handleSubmitAddComment={handleSubmitAddComment}
+        handleSubmitEditComment={handleSubmitEditComment}
+        handleSubmitDeleteComment={handleSubmitDeleteComment}
+      />
     </BottomSheetModalProvider>
   );
 };

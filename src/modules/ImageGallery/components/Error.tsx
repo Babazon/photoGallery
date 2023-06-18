@@ -1,6 +1,7 @@
 import {Text, View} from 'react-native';
 import styled from 'styled-components/native';
 import React from 'react';
+import {Maybe} from '../../../constants/types';
 
 export const ErrorContainer = styled(View)`
   flex: 1;
@@ -9,7 +10,7 @@ export const ErrorContainer = styled(View)`
 `;
 
 interface ErrorProps {
-  message: string | undefined;
+  message: Maybe<string>;
 }
 
 export const Error = ({message}: ErrorProps) => (

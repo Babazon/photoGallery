@@ -1,5 +1,5 @@
 import {QueryClient, useMutation, useQuery, useQueryClient} from 'react-query';
-import {ImageDto, CommentDto} from '../constants/types';
+import {ImageDto, CommentDto, Maybe} from '../constants/types';
 import {addComment, deleteComment, editComment, getImages} from './api';
 
 const CACHE_STALE_TIME = 300000;
@@ -15,7 +15,7 @@ export const useAddCommentMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    CommentDto | undefined,
+    Maybe<CommentDto>,
     Error,
     {imageId: string; comment: string}
   >(({imageId, comment}) => addComment(imageId, comment), {
@@ -29,7 +29,7 @@ export const useEditCommentMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    CommentDto | undefined,
+    Maybe<CommentDto>,
     Error,
     {imageId: string; commentId: string; updatedComment: string}
   >(

@@ -11,8 +11,8 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {QueryClientProvider} from 'react-query';
-import {ImageGallery} from './modules/ImageGallery/ImageGallery';
 import {client} from './services/queries';
+import {ImageGallery} from './modules/ImageGallery/ImageGallery';
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';

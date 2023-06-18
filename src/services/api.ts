@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {ImageDto, CommentDto} from '../constants/types';
+import {ImageDto, CommentDto, Maybe} from '../constants/types';
 
 const API_URL = 'http://localhost:3000';
 
@@ -17,7 +17,7 @@ export const getImages = async (page: number): Promise<ImageDto[]> => {
 export const addComment = async (
   imageId: string,
   comment: string,
-): Promise<CommentDto | undefined> => {
+): Promise<Maybe<CommentDto>> => {
   try {
     const response = await axios.post(`${API_URL}/images/${imageId}/comments`, {
       comment,
@@ -34,7 +34,7 @@ export const editComment = async (
   imageId: string,
   commentId: string,
   updatedComment: string,
-): Promise<CommentDto | undefined> => {
+): Promise<Maybe<CommentDto>> => {
   try {
     const response = await axios.put(
       `${API_URL}/images/${imageId}/comments/${commentId}`,

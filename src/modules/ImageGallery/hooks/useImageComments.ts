@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {ImageDto} from '../../../constants/types';
+import {CommentDto, ImageDto} from '../../../constants/types';
 import {
   useAddCommentMutation,
   useDeleteCommentMutation,
@@ -13,6 +13,7 @@ export const useImageComments = ({
 }) => {
   const [newComment, setNewComment] = useState('');
   const [editComment, setEditComment] = useState('');
+  const [selectedComment, setSelectedComment] = useState<CommentDto>();
 
   const addCommentMutation = useAddCommentMutation();
   const editCommentMutation = useEditCommentMutation();
@@ -67,6 +68,8 @@ export const useImageComments = ({
     setNewComment,
     editComment,
     setEditComment,
+    selectedComment,
+    setSelectedComment,
     handleSubmitAddComment,
     handleSubmitEditComment,
     handleSubmitDeleteComment,

@@ -1,13 +1,13 @@
 import {Request, Response} from 'express';
 import jsonServer from 'json-server';
-import {ImageDto, CommentDto} from '../../constants/types';
+import {ImageDto, CommentDto, Maybe} from '../../constants/types';
 import db from './db.json';
 
 const server = jsonServer.create();
 const router = jsonServer.router(db);
 server.use(jsonServer.bodyParser);
 
-server.get('/api/images', (req: Request, res: Response) => {
+server.get('/images', (req: Request, res: Response) => {
   const {page} = req.query;
   const startIndex = page ? (Number(page) - 1) * 10 : 0;
   const endIndex = startIndex + 10;
@@ -16,7 +16,7 @@ server.get('/api/images', (req: Request, res: Response) => {
   res.json({images, total});
 });
 
-server.post('/api/images/:id/comments', (req: Request, res: Response) => {
+server.post('/images/:id/comments', (req: Request, res: Response) => {
   const {id} = req.params;
   const {comment} = req.body;
 
@@ -39,7 +39,7 @@ server.post('/api/images/:id/comments', (req: Request, res: Response) => {
 });
 
 server.patch(
-  '/api/images/:imageId/comments/:commentId',
+  '/images/:imageId/comments/:commentId',
   (req: Request, res: Response) => {
     const {imageId, commentId} = req.params;
     const {comment} = req.body;
@@ -50,7 +50,7 @@ server.patch(
       return;
     }
 
-    const existingComment: CommentDto | undefined = image.comments.find(
+    const existingComment: Maybe<CommentDto> = image.comments.find(
       (c: CommentDto) => c.id === commentId,
     );
 
@@ -66,11 +66,13 @@ server.patch(
 );
 
 server.delete(
-  '/api/images/:imageId/comments/:commentId',
+  '/images/:imageId/comments/:commentId',
   (req: Request, res: Response) => {
     const {imageId, commentId} = req.params;
 
     const image: ImageDto = router.db.get('images').find({id: imageId}).value();
+    console.log({image});
+
     if (!image) {
       res.sendStatus(404);
       return;

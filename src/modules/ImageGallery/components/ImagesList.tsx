@@ -46,9 +46,7 @@ const ImageItem = ({item, onPress}: ImageItemProps) => (
   <TouchableOpacity onPress={() => onPress(item)}>
     <ItemContainer>
       <StyledImage source={{uri: item.url}} />
-      <Title>
-        {item.id}. {item.title}
-      </Title>
+      <Title>{item.title}</Title>
       <Description>{item.description}</Description>
     </ItemContainer>
   </TouchableOpacity>

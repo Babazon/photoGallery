@@ -9,14 +9,16 @@ import {
   StyleSheet,
 } from 'react-native';
 import styled from 'styled-components';
-import {ImageDto} from '../../../constants/types';
+import {CommentDto, ImageDto, Maybe} from '../../../constants/types';
 import {formatDate} from '../../../utils/formatDate';
 import {translations} from '../../../constants/translations.en';
 
 interface ImageModalProps {
   ref: React.RefObject<any>;
   snapPoints: string[];
-  selectedImage: ImageDto | undefined;
+  selectedImage: Maybe<ImageDto>;
+  selectedComment: Maybe<CommentDto>;
+  setSelectedComment: (comment?: CommentDto) => void;
   newComment: string;
   setNewComment: (comment: string) => void;
   editComment: string;
@@ -31,8 +33,12 @@ export const ImageModal = forwardRef<any, ImageModalProps>(
     {
       snapPoints,
       selectedImage,
+      selectedComment,
+      setSelectedComment,
       newComment,
       setNewComment,
+      editComment,
+      setEditComment,
       handleSubmitAddComment,
       handleSubmitEditComment,
       handleSubmitDeleteComment,
@@ -50,7 +56,7 @@ export const ImageModal = forwardRef<any, ImageModalProps>(
         <ModalTitle>{selectedImage?.title ?? ''}</ModalTitle>
         <CommentContainer>
           <CommentInput
-            placeholder="Enter a comment"
+            placeholder={translations.commentPlaceholder}
             placeholderTextColor="white"
             value={newComment}
             onChangeText={setNewComment}
@@ -60,25 +66,54 @@ export const ImageModal = forwardRef<any, ImageModalProps>(
           </AddButton>
         </CommentContainer>
         <CommentList>
-          {selectedImage?.comments.map((comment, index) => (
+          {selectedImage?.comments.map((comment: CommentDto, index: number) => (
             <CommentItem key={index}>
-              <CommentText>{comment.comment}</CommentText>
-              <CommentDate>{formatDate(comment.date)}</CommentDate>
-              <CommentActions>
-                <TouchableOpacity
-                  onPress={() => handleSubmitEditComment(comment.id, 'baba')}
-                  style={styles.buttonMargin}>
-                  <CommentActionText>
-                    {translations.editComment}
-                  </CommentActionText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleSubmitDeleteComment(comment.id)}>
-                  <CommentActionText>
-                    {translations.deleteComment}
-                  </CommentActionText>
-                </TouchableOpacity>
-              </CommentActions>
+              {selectedComment && selectedComment.id === comment.id ? (
+                <CommentContainer>
+                  <CommentInput
+                    placeholder="Enter a comment"
+                    placeholderTextColor="white"
+                    value={editComment}
+                    onChangeText={setEditComment}
+                  />
+                  <CommentActions>
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleSubmitEditComment(comment.id, editComment ?? '')
+                      }
+                      style={styles.buttonMargin}>
+                      <CommentActionText>
+                        {translations.submitEditComment}
+                      </CommentActionText>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setSelectedComment()}>
+                      <CommentActionText>
+                        {translations.cancelEditComment}
+                      </CommentActionText>
+                    </TouchableOpacity>
+                  </CommentActions>
+                </CommentContainer>
+              ) : (
+                <>
+                  <CommentText>{comment.comment}</CommentText>
+                  <CommentDate>{formatDate(comment.date)}</CommentDate>
+                  <CommentActions>
+                    <TouchableOpacity
+                      onPress={() => setSelectedComment(comment)}
+                      style={styles.buttonMargin}>
+                      <CommentActionText>
+                        {translations.editComment}
+                      </CommentActionText>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleSubmitDeleteComment(comment.id)}>
+                      <CommentActionText>
+                        {translations.deleteComment}
+                      </CommentActionText>
+                    </TouchableOpacity>
+                  </CommentActions>
+                </>
+              )}
             </CommentItem>
           ))}
         </CommentList>
@@ -93,7 +128,7 @@ const ModalTitle = styled(Text)`
 
 const CommentContainer = styled(View)`
   background-color: rgba(0, 0, 0, 0.2);
-  margin: 8px;
+  margin-vertical: 16px;
 `;
 
 const CommentInput = styled(TextInput)`
