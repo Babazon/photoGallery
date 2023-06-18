@@ -1,90 +1,96 @@
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View, Dimensions, ImageBackground, Button } from 'react-native';
-import { useGetImages } from './hooks/useGetImages';
-import { ImageDto } from '../../constants/types';
-import React, { useMemo } from 'react';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import React, {useMemo, useRef, useState} from 'react';
+import {View} from 'react-native';
+import styled from 'styled-components/native';
+import {ImageDto} from '../../constants/types';
+import {Error, ErrorContainer} from './components/Error';
+import {ImageModal} from './components/ImageModal';
+import {ImagesList} from './components/ImagesList';
+import {Loader, LoaderContainer} from './components/Loader';
+import {useGetImages} from './hooks/useGetImages';
+import {useImageComments} from './hooks/useImageComments';
 
-const { width } = Dimensions.get('window');
-const itemWidth = width;
-const itemHeight = width / 2;
+const Container = styled(View)`
+  flex: 1;
+  backgroundcolor: 'red';
+`;
+
 export const ImageGallery: React.FC = () => {
-    const {
-      combinedData,
-      isLoading,
-      isError,
-      error,
-      isFetching,
-      handleLoadMore,
-      handleRefresh,
-    } = useGetImages();
-  
-    if (isLoading) {
-      return (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="red" />
-        </View>
-      );
-    }
-  
-    if (isError) {
-      return (
-        <View style={styles.errorContainer}>
-          <Text>{error?.message}</Text>
-        </View>
-      );
-    }
-  
-    return (
-      <FlatList
-        data={combinedData}
-        keyExtractor={(item, index) => `${item.id}_${index}`}
-        renderItem={({ item }) => (
-          <View style={styles.itemContainer}>
-            <Image source={{ uri: item.url }} style={styles.image} />
-            <Text style={styles.title}>{item.id}. {item.title}</Text>
-            <Text style={styles.description}>{item.description}</Text>
-          </View>
-        )}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        refreshing={isFetching}
-        onRefresh={handleRefresh}
-        contentContainerStyle={styles.flatListContent}
-      />
-    );
+  const {
+    combinedData,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+    handleLoadMore,
+    handleRefresh,
+  } = useGetImages();
+
+  const [selectedImage, setSelectedImage] = useState<ImageDto>();
+
+  const {
+    newComment,
+    setNewComment,
+    editComment,
+    setEditComment,
+    handleSubmitAddComment,
+    handleSubmitEditComment,
+    handleSubmitDeleteComment,
+  } = useImageComments({selectedImage});
+
+  const bottomSheetModalRef = useRef(null);
+  const snapPoints = useMemo(() => ['90%'], []);
+
+  const openModal = () => {
+    bottomSheetModalRef?.current?.present &&
+      bottomSheetModalRef.current.present();
   };
-  
-  const styles = StyleSheet.create({
-    loaderContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    errorContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    itemContainer: {
-      width: itemWidth,
-      height: itemHeight,
-      marginBottom: 16,
-    },
-    image: {
-      flex: 1,
-      resizeMode: 'cover',
-    },
-    title: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginVertical: 8,
-    },
-    description: {
-      fontSize: 14,
-      marginBottom: 8,
-    },
-    flatListContent: {
-      paddingHorizontal: 16,
-      paddingTop: 16,
-      paddingBottom: 16,
-    },
-  });
+
+  const handleImagePress = (img: ImageDto) => {
+    setSelectedImage(img);
+    openModal();
+  };
+
+  if (isLoading) {
+    return (
+      <LoaderContainer>
+        <Loader size="large" color="red" />
+      </LoaderContainer>
+    );
+  }
+
+  if (isError) {
+    return (
+      <ErrorContainer>
+        <Error message={error?.message} />
+      </ErrorContainer>
+    );
+  }
+
+  return (
+    <BottomSheetModalProvider>
+      <Container>
+        <ImagesList
+          data={combinedData}
+          onPress={handleImagePress}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          refreshing={isFetching}
+          onRefresh={handleRefresh}
+        />
+        <ImageModal
+          ref={bottomSheetModalRef}
+          snapPoints={snapPoints}
+          selectedImage={selectedImage}
+          newComment={newComment}
+          setNewComment={setNewComment}
+          editComment={editComment}
+          setEditComment={setEditComment}
+          handleSubmitAddComment={handleSubmitAddComment}
+          handleSubmitEditComment={handleSubmitEditComment}
+          handleSubmitDeleteComment={handleSubmitDeleteComment}
+        />
+      </Container>
+    </BottomSheetModalProvider>
+  );
+};
