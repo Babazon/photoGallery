@@ -1,15 +1,15 @@
 export type Maybe<T> = T | undefined;
 
 export interface CommentDto {
-  id: string;
+  id: number;
   comment: string;
   date: string;
-  imageId: string;
+  imageId: number;
 }
 
 export interface ImageDto {
   url: string;
-  id: string;
+  id: number;
   title: Maybe<string>;
   description: Maybe<string>;
   comments: CommentDto[];

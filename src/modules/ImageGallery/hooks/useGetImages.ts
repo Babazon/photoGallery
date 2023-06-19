@@ -2,7 +2,20 @@ import {useEffect, useState} from 'react';
 import {ImageDto} from '../../../constants/types';
 import {useGetImagesQuery} from '../../../services/queries';
 
-export const useGetImages = () => {
+interface UseGetImagesResult {
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  combinedData: ImageDto[];
+  isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
+  isFetching: boolean;
+  isRefreshing: boolean;
+  handleLoadMore: () => void;
+  handleRefresh: () => void;
+}
+
+export const useGetImages = (): UseGetImagesResult => {
   const [page, setPage] = useState(1);
   const {data, isLoading, isError, error, isFetching} = useGetImagesQuery(page);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -22,11 +35,11 @@ export const useGetImages = () => {
     }
   }, [data, page]);
 
-  const handleLoadMore = () => {
+  const handleLoadMore = (): void => {
     setPage(prevPage => prevPage + 1);
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     setIsRefreshing(true);
     setPage(1);
   };

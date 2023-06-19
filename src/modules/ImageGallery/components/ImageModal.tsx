@@ -14,18 +14,17 @@ import {formatDate} from '../../../utils/formatDate';
 import {translations} from '../../../constants/translations.en';
 
 interface ImageModalProps {
-  ref: React.RefObject<any>;
   snapPoints: string[];
   selectedImage: Maybe<ImageDto>;
   selectedComment: Maybe<CommentDto>;
-  setSelectedComment: (comment?: CommentDto) => void;
+  setSelectedComment: (comment: CommentDto | null) => void;
   newComment: string;
   setNewComment: (comment: string) => void;
   editComment: string;
   setEditComment: (comment: string) => void;
   handleSubmitAddComment: () => void;
-  handleSubmitEditComment: (id: string, comment: string) => void;
-  handleSubmitDeleteComment: (id: string) => void;
+  handleSubmitEditComment: (id: number, comment: string) => void;
+  handleSubmitDeleteComment: (id: number) => void;
 }
 
 export const ImageModal = forwardRef<any, ImageModalProps>(
@@ -66,12 +65,11 @@ export const ImageModal = forwardRef<any, ImageModalProps>(
           </AddButton>
         </CommentContainer>
         <CommentList>
-          {selectedImage?.comments.map((comment: CommentDto, index: number) => (
-            <CommentItem key={index}>
+          {selectedImage?.comments.map((comment: CommentDto) => (
+            <CommentItem key={`${comment.id}`}>
               {selectedComment && selectedComment.id === comment.id ? (
                 <CommentContainer>
                   <CommentInput
-                    placeholder="Enter a comment"
                     placeholderTextColor="white"
                     value={editComment}
                     onChangeText={setEditComment}
@@ -86,7 +84,7 @@ export const ImageModal = forwardRef<any, ImageModalProps>(
                         {translations.submitEditComment}
                       </CommentActionText>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setSelectedComment()}>
+                    <TouchableOpacity onPress={() => setSelectedComment(null)}>
                       <CommentActionText>
                         {translations.cancelEditComment}
                       </CommentActionText>
@@ -99,7 +97,10 @@ export const ImageModal = forwardRef<any, ImageModalProps>(
                   <CommentDate>{formatDate(comment.date)}</CommentDate>
                   <CommentActions>
                     <TouchableOpacity
-                      onPress={() => setSelectedComment(comment)}
+                      onPress={() => {
+                        setSelectedComment(comment);
+                        setEditComment(comment.comment);
+                      }}
                       style={styles.buttonMargin}>
                       <CommentActionText>
                         {translations.editComment}

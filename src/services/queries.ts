@@ -1,8 +1,9 @@
 import {QueryClient, useMutation, useQuery, useQueryClient} from 'react-query';
 import {ImageDto, CommentDto, Maybe} from '../constants/types';
-import {addComment, deleteComment, editComment, getImages} from './api';
+import {api} from './api';
+import {CACHE_STALE_TIME} from '../constants/constants';
 
-const CACHE_STALE_TIME = 300000;
+const {addComment, deleteComment, editComment, getImages} = api;
 
 export const useGetImagesQuery = (page: number) => {
   return useQuery<ImageDto[], Error>(['images', page], () => getImages(page), {
@@ -17,7 +18,7 @@ export const useAddCommentMutation = () => {
   return useMutation<
     Maybe<CommentDto>,
     Error,
-    {imageId: string; comment: string}
+    {imageId: number; comment: string}
   >(({imageId, comment}) => addComment(imageId, comment), {
     onSuccess: () => {
       queryClient.invalidateQueries('images');
@@ -31,7 +32,7 @@ export const useEditCommentMutation = () => {
   return useMutation<
     Maybe<CommentDto>,
     Error,
-    {imageId: string; commentId: string; updatedComment: string}
+    {imageId: number; commentId: number; updatedComment: string}
   >(
     ({imageId, commentId, updatedComment}) =>
       editComment(imageId, commentId, updatedComment),
@@ -46,7 +47,7 @@ export const useEditCommentMutation = () => {
 export const useDeleteCommentMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, {imageId: string; commentId: string}>(
+  return useMutation<void, Error, {imageId: number; commentId: number}>(
     ({imageId, commentId}) => deleteComment(imageId, commentId),
     {
       onSuccess: () => {

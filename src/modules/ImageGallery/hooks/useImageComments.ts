@@ -6,20 +6,39 @@ import {
   useEditCommentMutation,
 } from '../../../services/queries';
 
+interface UseImageCommentsProps {
+  selectedImage?: ImageDto;
+}
+
+interface UseImageCommentsResult {
+  newComment: string;
+  setNewComment: React.Dispatch<React.SetStateAction<string>>;
+  editComment: string;
+  setEditComment: React.Dispatch<React.SetStateAction<string>>;
+  selectedComment: CommentDto | null;
+  setSelectedComment: React.Dispatch<React.SetStateAction<CommentDto | null>>;
+  handleSubmitAddComment: () => Promise<void>;
+  handleSubmitEditComment: (
+    commentId: number,
+    updatedComment: string,
+  ) => Promise<void>;
+  handleSubmitDeleteComment: (commentId: number) => Promise<void>;
+}
+
 export const useImageComments = ({
   selectedImage,
-}: {
-  selectedImage?: ImageDto;
-}) => {
+}: UseImageCommentsProps): UseImageCommentsResult => {
   const [newComment, setNewComment] = useState('');
   const [editComment, setEditComment] = useState('');
-  const [selectedComment, setSelectedComment] = useState<CommentDto>();
+  const [selectedComment, setSelectedComment] = useState<CommentDto | null>(
+    null,
+  );
 
   const addCommentMutation = useAddCommentMutation();
   const editCommentMutation = useEditCommentMutation();
   const deleteCommentMutation = useDeleteCommentMutation();
 
-  const handleSubmitAddComment = async () => {
+  const handleSubmitAddComment = async (): Promise<void> => {
     if (newComment && selectedImage) {
       try {
         await addCommentMutation.mutateAsync({
@@ -28,15 +47,15 @@ export const useImageComments = ({
         });
         setNewComment('');
       } catch (error) {
-        // Handle error
+        console.error(error);
       }
     }
   };
 
   const handleSubmitEditComment = async (
-    commentId: string,
+    commentId: number,
     updatedComment: string,
-  ) => {
+  ): Promise<void> => {
     if (selectedImage) {
       try {
         await editCommentMutation.mutateAsync({
@@ -44,13 +63,18 @@ export const useImageComments = ({
           commentId,
           updatedComment,
         });
+
+        setSelectedComment(null);
+        setEditComment('');
       } catch (error) {
-        // Handle error
+        console.error(error);
       }
     }
   };
 
-  const handleSubmitDeleteComment = async (commentId: string) => {
+  const handleSubmitDeleteComment = async (
+    commentId: number,
+  ): Promise<void> => {
     if (selectedImage) {
       try {
         await deleteCommentMutation.mutateAsync({
@@ -58,7 +82,7 @@ export const useImageComments = ({
           commentId,
         });
       } catch (error) {
-        // Handle error
+        console.error(error);
       }
     }
   };

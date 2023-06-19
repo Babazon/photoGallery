@@ -1,9 +1,13 @@
-import axios from 'axios';
+import {PAGE_SIZE, API_URL, IS_DEV} from '../constants/constants';
 import {ImageDto, CommentDto, Maybe} from '../constants/types';
+import axios from 'axios';
 
-const API_URL = 'http://localhost:3000';
-
-const PAGE_SIZE = 10;
+import {
+  getImagesMock,
+  addCommentMock,
+  editCommentMock,
+  deleteCommentMock,
+} from './mockApi/mockApi';
 
 export const getImages = async (page: number): Promise<ImageDto[]> => {
   const startIndex = (page - 1) * PAGE_SIZE;
@@ -15,7 +19,7 @@ export const getImages = async (page: number): Promise<ImageDto[]> => {
 };
 
 export const addComment = async (
-  imageId: string,
+  imageId: number,
   comment: string,
 ): Promise<Maybe<CommentDto>> => {
   try {
@@ -31,12 +35,12 @@ export const addComment = async (
 };
 
 export const editComment = async (
-  imageId: string,
-  commentId: string,
+  imageId: number,
+  commentId: number,
   updatedComment: string,
 ): Promise<Maybe<CommentDto>> => {
   try {
-    const response = await axios.put(
+    const response = await axios.patch(
       `${API_URL}/images/${imageId}/comments/${commentId}`,
       {
         comment: updatedComment,
@@ -50,12 +54,19 @@ export const editComment = async (
 };
 
 export const deleteComment = async (
-  imageId: string,
-  commentId: string,
+  imageId: number,
+  commentId: number,
 ): Promise<void> => {
   try {
     await axios.delete(`${API_URL}/images/${imageId}/comments/${commentId}`);
   } catch (error) {
     console.error('Failed to delete comment:', error);
   }
+};
+
+export const api = {
+  getImages: IS_DEV ? getImagesMock : getImages,
+  addComment: IS_DEV ? addCommentMock : addComment,
+  editComment: IS_DEV ? editCommentMock : editComment,
+  deleteComment: IS_DEV ? deleteCommentMock : deleteComment,
 };
