@@ -10,6 +10,10 @@ Running the app
 1. Run `yarn start` in the root of repository  
 2. In another terminal window, run `yarn ios` (you must have iPhone 14 simulator in your xcode environment. Otherwise use `npx react-native run-ios`)
 
+Running unit tests
+
+1. Simply run yarn test
+
 
 Notes:  
 
